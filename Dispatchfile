@@ -1,0 +1,19 @@
+#!starlark
+
+gitResource("src-git", url="$(context.git.url)", revision="$(context.git.commit)")
+
+def volume(name, **kwargs):
+    return v1.Volume(name=name, volumeSource=v1.VolumeSource(**kwargs))
+
+task("echorepo",
+    inputs = ["src-git"],
+    steps = [k8s.corev1.Container(
+        name = "echorepostep",
+        image = "golang:1.13.0-buster",
+        command = [ "cat" , "README.md"],
+        workingDir = "/workspace/src-git"
+    )])
+
+action(tasks = ["echovolume"], on = push(branches = ["master"]))
+action(tasks = ["echovolume"], on = pullRequest(branches = ["master"]))
+action(tasks = ["echovolume"], on = pullRequest(branches = ["master"], chatops = ["test"]))
