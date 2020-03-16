@@ -1,19 +1,55 @@
-#!starlark
-
-gitResource("src-git", url="$(context.git.url)", revision="$(context.git.commit)")
-
-def volume(name, **kwargs):
-    return v1.Volume(name=name, volumeSource=v1.VolumeSource(**kwargs))
-
-task("echorepo",
-    inputs = ["src-git"],
-    steps = [k8s.corev1.Container(
-        name = "echorepostep",
-        image = "golang:1.13.0-buster",
-        command = [ "cat" , "README.md"],
-        workingDir = "/workspace/src-git"
-    )])
-
-action(tasks = ["echovolume"], on = push(branches = ["master"]))
-action(tasks = ["echovolume"], on = pullRequest(branches = ["master"]))
-action(tasks = ["echovolume"], on = pullRequest(branches = ["master"], chatops = ["test"]))
+resource "src-git": {
+  type: "git"
+  param url: "$(context.git.url)"
+  param revision: "$(context.git.commit)"
+}
+resource "docker-image": {
+  type: "image"
+  param url: "djannot/nginx:$(context.build.name)"
+}
+resource "gitops-git": {
+  type: "git"
+  param url: "http://a2f6febc1cb7c4f1f8f3892268fa7f69-1677121820.us-west-2.elb.amazonaws.com/user1/user1-nginx-gitops"
+}
+task "build": {
+  inputs: ["src-git"]
+  outputs: ["docker-image"]
+  steps: [
+    {
+      name: "build-and-push"
+      image: "chhsiao/kaniko-executor"
+      args: [
+        "--destination=$(outputs.resources.docker-image.url)",
+        "--context=/workspace/src-git",
+        "--oci-layout-path=/workspace/output/docker-image",
+        "--dockerfile=/workspace/src-git/Dockerfile"
+      ]
+    }
+  ]
+}
+task "deploy": {
+  inputs: ["docker-image", "gitops-git"]
+  steps: [
+    {
+      name: "update-gitops-repo"
+      image: "mesosphere/update-gitops-repo:v1.0"
+      workingDir: "/workspace/gitops-git"
+      args: [
+        "-git-revision=$(context.git.commit)",
+        "-branch=$(context.git.commit)",
+        "-filepath=application.yaml.tmpl",
+        "-create-pull-request=true",
+        "-substitute=imageName=$(inputs.resources.docker-image.url)@$(inputs.resources.docker-image.digest)"
+      ]
+    }
+  ]
+}
+actions: [
+  {
+    tasks: ["build", "deploy"]
+    on push: {
+      branches: ["master"]
+      paths: ["**"]
+    }
+  }
+]
