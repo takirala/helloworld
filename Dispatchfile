@@ -3,14 +3,17 @@ resource "src-git": {
   param url: "$(context.git.url)"
   param revision: "$(context.git.commit)"
 }
+
 resource "docker-image": {
   type: "image"
-  param url: "djannot/nginx:$(context.build.name)"
+  param url: "takirala/nginx:$(context.build.name)"
 }
+
 resource "gitops-git": {
   type: "git"
-  param url: "http://a2f6febc1cb7c4f1f8f3892268fa7f69-1677121820.us-west-2.elb.amazonaws.com/user1/user1-nginx-gitops"
+  param url: "http://gitlab.com/takirala/helloworld"
 }
+
 task "build": {
   inputs: ["src-git"]
   outputs: ["docker-image"]
