@@ -6,12 +6,12 @@ resource "src-git": {
 
 resource "docker-image": {
   type: "image"
-  param url: "takirala/nginx:$(context.build.name)"
+  param url: "takirala/helloworld:$(context.build.name)"
 }
 
 resource "gitops-git": {
   type: "git"
-  param url: "http://gitlab.com/takirala/helloworld"
+  param url: "https://gitlab.com/takirala/helloworld"
 }
 
 task "build": {
@@ -20,7 +20,7 @@ task "build": {
   steps: [
     {
       name: "build-and-push"
-      image: "chhsiao/kaniko-executor"
+      image: "chhsiao/kaniko-executor:latest"
       args: [
         "--destination=$(outputs.resources.docker-image.url)",
         "--context=/workspace/src-git",
@@ -47,9 +47,10 @@ task "deploy": {
     }
   ]
 }
+
 actions: [
   {
-    tasks: ["build", "deploy"]
+    tasks: ["build"]
     on push: {
       branches: ["master"]
       paths: ["**"]
