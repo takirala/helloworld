@@ -15,7 +15,7 @@ git = gitResource("helloworld-git")
 # This is a simple dindTask that accepts one input (git repo) and runs the `test.sh` script in that repo
 dindTask("unit-test", inputs=["helloworld-git"], steps=[k8s.corev1.Container(
     name="unit-test",
-    command=["/workspace/git/test.sh"],
+    command=["/workspace/helloworld-git/test.sh"],
 )])
 
 # Define the actions to run the task `unit-test` on every pull request and whenever a comment `/test` is made on the pull request.
