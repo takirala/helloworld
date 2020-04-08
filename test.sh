@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run -v $(pwd):/test -w /test --rm -it golang go test -v ./...
