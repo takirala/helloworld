@@ -14,6 +14,7 @@ git = gitResource("helloworld-git")
 
 # This is a simple dindTask that accepts one input (git repo) and runs the `test.sh` script in that repo
 dindTask("unit-test", inputs=["helloworld-git"], steps=[k8s.corev1.Container(
+    image="mesosphere/dispatch-dind:1.0.0",
     name="unit-test",
     workingDir="/workspace/helloworld-git",
     command=["/bin/bash", "-c", "./test.sh"],
