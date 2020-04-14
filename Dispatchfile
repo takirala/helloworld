@@ -1,25 +1,29 @@
 #!mesosphere/dispatch-starlark:v0.5-beta1
 # vi:syntax=python
 
-# Import the predefined Docker-in-Docker task from Dispatch Catalog.
-# This is optional and if you don't want to do this, you can use your own task defintion.
-# Refer to the growing list of tasks in Dispatch catalog.
-load("github.com/mesosphere/dispatch-catalog/starlark/stable/docker@0.0.3", "dindTask")
-
-# Import the pullRequest condition from starlark catalog
 load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.3", "gitResource", "pullRequest")
+load("github.com/mesosphere/dispatch-catalog/starlark/experimental/buildkit@buildkit-steps", "buildkit")
 
-# Create a git resource for the repository
 git = gitResource("helloworld-git")
 
-# This is a simple dindTask that accepts one input (git repo) and runs the `test.sh` script in that repo
-dindTask("unit-test", inputs=["helloworld-git"], steps=[k8s.corev1.Container(
-    image="mesosphere/dispatch-dind:1.0.0",
-    name="unit-test",
-    workingDir="/workspace/helloworld-git",
-    command=["/bin/bash", "-c", "./test.sh"],
-)])
+simple_docker = buildkit(git, "takirala/helloworld")
 
-# Define the actions to run the task `unit-test` on every pull request and whenever a comment `/test` is made on the pull request.
-action(tasks=["unit-test"], on=pullRequest())
-action(tasks=["unit-test"], on=pullRequest(chatops=["/test"]))
+task("unit-test-docker",
+    inputs=[simple_docker],
+    steps=[k8s.corev1.Container(
+        name="unit-test-docker",
+        image="takirala/helloworld:$(context.build.name)",
+        workingDir="/test",
+        command=["go", "test", "./..."])])
+
+task("unit-test-simple",
+    inputs=[git],
+    steps=[k8s.corev1.Container(
+        name="go-test",
+        image="golang:1.14.0",
+        workingDir="/workspace/{}".format(git),
+        command=["go", "test", "./..."])])
+
+simpleTasks = ["unit-test-simple", "unit-test-docker"]
+action(tasks=simpleTasks, on=pullRequest())
+action(tasks=simpleTasks, on=pullRequest(chatops=["test"]))
