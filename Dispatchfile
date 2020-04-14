@@ -1,12 +1,12 @@
 #!mesosphere/dispatch-starlark:v0.5-beta1
 # vi:syntax=python
 
+load("github.com/mesosphere/dispatch-catalog/starlark/stable/go@0.0.3", "ko")
 load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.3", "gitResource", "pullRequest")
-load("github.com/mesosphere/dispatch-catalog/starlark/experimental/buildkit@buildkit-steps", "buildkit")
 
 git = gitResource("helloworld-git")
 
-simple_docker = buildkit(git, "takirala/helloworld")
+simple_docker = ko(git, "takirala/helloworld", "helloworld", tag="$(context.build.name)")
 
 task("unit-test-docker",
     inputs=[simple_docker],
