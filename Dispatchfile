@@ -7,17 +7,16 @@ load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.3", "kan
 git = gitResource("helloworld-git")
 
 # Build and push the docker image
-simple_docker = kaniko(git, "$YOURDOCKERUSERNAME/helloworld")
+simple_docker = kaniko(git, "takirala/helloworld")
 
 task("unit-test-simple",
     inputs=[simple_docker],
     steps=[k8s.corev1.Container(
         name="unit-test-docker",
-        image="$YOURDOCKERUSERNAME/helloworld:$(context.build.name)",
+        image="takirala/helloworld:$(context.build.name)",
         workingDir="/test",
         command=["go", "test", "./..."])])
 
-simpleTasks = ["unit-test-simple"]
 
 task("version", steps = [
     v1.Container(name="version", image="alpine", command=["/bin/ash", "-c", "echo lol"])
@@ -33,6 +32,6 @@ set -ex
 """
 ])])
 
-
+simpleTasks = ["unit-test-simple"]
 action(tasks=simpleTasks, on=pullRequest())
 action(tasks=simpleTasks, on=pullRequest(chatops=["build"]))
