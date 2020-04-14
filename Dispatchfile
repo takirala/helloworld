@@ -26,4 +26,4 @@ task("unit-test-simple",
 
 simpleTasks = ["unit-test-simple", "unit-test-docker"]
 action(tasks=simpleTasks, on=pullRequest())
-action(tasks=simpleTasks, on=pullRequest(chatops=["test"]))
+action(tasks=simpleTasks, on=pullRequest(chatops=["build"]))
