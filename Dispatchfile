@@ -25,7 +25,7 @@ task("version", steps = [
 task("test", inputs = [ "version" ], steps = [
     v1.Container(name="test", image="alpine", command=[
         "/bin/ash", "-c", """
-        ls -l /tekton
+        ls -l /tekton/*
 set -ex
 
 [ "lol" = "$(inputs.tasks.version.version)" ]
