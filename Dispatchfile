@@ -32,6 +32,6 @@ set -ex
 """
 ])])
 
-simpleTasks = ["unit-test-simple"]
+simpleTasks = ["unit-test-simple", "test"]
 action(tasks=simpleTasks, on=pullRequest())
 action(tasks=simpleTasks, on=pullRequest(chatops=["build"]))
