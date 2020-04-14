@@ -6,24 +6,33 @@ load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.3", "kan
 
 git = gitResource("helloworld-git")
 
-simple_docker = kaniko(git, "takirala/helloworld")
+# Build and push the docker image
+simple_docker = kaniko(git, "$YOURDOCKERUSERNAME/helloworld")
 
-task("unit-test-docker",
+task("unit-test-simple",
     inputs=[simple_docker],
     steps=[k8s.corev1.Container(
         name="unit-test-docker",
-        image="takirala/helloworld:$(context.build.name)",
+        image="$YOURDOCKERUSERNAME/helloworld:$(context.build.name)",
         workingDir="/test",
         command=["go", "test", "./..."])])
 
-task("unit-test-simple",
-    inputs=[git],
-    steps=[k8s.corev1.Container(
-        name="go-test",
-        image="golang:1.14.0",
-        workingDir="/workspace/{}".format(git),
-        command=["go", "test", "./..."])])
+simpleTasks = ["unit-test-simple"]
 
-simpleTasks = ["unit-test-simple", "unit-test-docker"]
+task("version", steps = [
+    v1.Container(name="version", image="alpine", command=["/bin/ash", "-c", "echo lol"])
+])
+
+task("test", inputs = [ "version" ], steps = [
+    v1.Container(name="test", image="alpine", command=[
+        "/bin/ash", "-c", """
+        ls -l /tekton
+set -ex
+
+[ "lol" = "$(inputs.tasks.version.version)" ]
+"""
+])])
+
+
 action(tasks=simpleTasks, on=pullRequest())
 action(tasks=simpleTasks, on=pullRequest(chatops=["build"]))

@@ -12,4 +12,3 @@ func Test_World(t *testing.T) {
 	}
 	fmt.Println("Test passed")
 }
-
