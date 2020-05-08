@@ -1,0 +1,37 @@
+#!mesosphere/dispatch-starlark:v0.5-beta1
+# vi:syntax=python
+
+load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.3", "gitResource", "pullRequest")
+load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.3", "kaniko")
+
+git = gitResource("helloworld-git")
+
+# Build and push the docker image
+simple_docker = kaniko(git, "takirala/helloworld")
+
+task("unit-test-simple",
+    inputs=[simple_docker],
+    steps=[k8s.corev1.Container(
+        name="unit-test-docker",
+        image="takirala/helloworld:$(context.build.name)",
+        workingDir="/test",
+        command=["go", "test", "./..."])])
+
+
+task("version", steps = [
+    v1.Container(name="version", image="alpine", command=["/bin/ash", "-c", "echo lol"])
+])
+
+task("test", inputs = [ "version" ], steps = [
+    v1.Container(name="test", image="alpine", command=[
+        "/bin/ash", "-c", """
+        ls -l /tekton/*
+set -ex
+
+[ "lol" = "$(inputs.tasks.version.version)" ]
+"""
+])])
+
+simpleTasks = ["unit-test-simple", "test"]
+action(tasks=simpleTasks, on=pullRequest())
+action(tasks=simpleTasks, on=pullRequest(chatops=["build"]))
