@@ -25,3 +25,4 @@ resources = k8s.corev1.ResourceRequirements(
 #Actions that define trigger to execute tasks
 action(tasks=["sastscan-check"], on=pull_request())
 action(tasks=["sastscan-check"], on=pull_request(chatops=["scan"]))
+action(name = "nightly-scan", tasks = ["sastscan-check"], on = cron(schedule = "@daily"))
