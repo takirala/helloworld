@@ -1,5 +1,4 @@
-#!takirala/dispatch-starlark:v0.6-beta1
-# vi:syntax=python
+#!takirala/dispatch-starlark:v0.5
 
 #Import libraries from public catalog
 load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@master", "git_resource", "pull_request")
@@ -21,6 +20,10 @@ resources = k8s.corev1.ResourceRequirements(
         "memory": k8s.resource_quantity("8Gi")
     }),
 )
+
+
+def cron(**kwargs):
+   return p.Condition(cron=p.CronCondition(**kwargs))
 
 #Actions that define trigger to execute tasks
 action(tasks=["sastscan-check"], on=pull_request())
