@@ -1,4 +1,4 @@
-#!mesosphere/dispatch-starlark:v0.5
+#!takirala/dispatch-starlark:v0.6-beta1
 # vi:syntax=python
 
 #Import libraries from public catalog
