@@ -3,7 +3,7 @@
 resource "dispatch-git": {
   type: "git"
   param url: "$(context.git.url)"
-  param revision: "master"
+  param revision: "$(context.git.commit)"
 }
 
 task "build": {
@@ -13,7 +13,7 @@ task "build": {
       name: "build"
       image: "golang:1.13.0-buster"
       command: [ "go", "build", "main.go" ]
-      env: [ { name: "GO111MODULE", value: "off" }, { name: "VERSION", value: "$(context.build.name)" } ]
+      env: [ { name: "GO111MODULE", value: "off" } ]
       workingDir: "/workspace/dispatch-git"
     }
   ]
