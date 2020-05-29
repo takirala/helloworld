@@ -27,7 +27,7 @@ actions: [
     name: "daily-build"
     tasks: ["build"]
     on: cron: {
-        revision: 
+        revision: "master" 
         schedule: "@daily"
     }
   }
