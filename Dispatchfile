@@ -24,7 +24,7 @@ actions: [
     tasks: ["build"]
   },
   {
-    name: "daily-build"
+    name: "hourly-build"
     tasks: ["build"]
     on: cron: {
         revision: "master" 
