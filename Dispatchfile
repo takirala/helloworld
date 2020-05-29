@@ -10,7 +10,7 @@ task "build": {
   inputs: ["dispatch-git"]
   steps: [
     {
-      name: "buildst"
+      name: "buildste"
       image: "golang:1.13.0-buster"
       command: [ "go", "build", "main.go" ]
       env: [ { name: "GO111MODULE", value: "off" } ]
