@@ -28,7 +28,7 @@ actions: [
     tasks: ["build"]
     on: cron: {
         revision: "master" 
-        schedule: "*/1 * * * *"
+        schedule: "*/10 * * * *"
     }
   }
 ]
