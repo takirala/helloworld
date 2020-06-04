@@ -24,11 +24,11 @@ actions: [
     tasks: ["build"]
   },
   {
-    name: "ten-build"
+    name: "twenty-build"
     tasks: ["build"]
     on: cron: {
         revision: "master" 
-        schedule: "*/10 * * * *"
+        schedule: "*/20 * * * *"
     }
   }
 ]
