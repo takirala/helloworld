@@ -24,11 +24,17 @@ actions: [
     tasks: ["build"]
   },
   {
-    name: "hourly-hello"
+    name: "hourly-build"
     tasks: ["build"]
     on: cron: {
         revision: "master" 
         schedule: "@hourly"
+    }
+  },
+  {
+    tasks: ["build"]
+    on: pull_request: {
+      branches: ["master"]
     }
   }
 ]
