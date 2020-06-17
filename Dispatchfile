@@ -6,8 +6,24 @@ resource "dispatch-git": {
   param revision: "master"
 }
 
+resource "storage-check": {
+  param: {
+    dir: "y"
+    location: "s3://artifacts/storage-check"
+    type: "gcs"
+  }
+  secret: {
+    BOTO_CONFIG: {
+      key: "boto"
+      name: "s3-config"
+    }
+  }
+  type: "storage"
+}
+
 task "build": {
   inputs: ["dispatch-git"]
+  outputs: ["storage-check"]
   steps: [
     {
       name: "buildste"
