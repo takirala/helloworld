@@ -9,7 +9,7 @@ resource "dispatch-git": {
 resource "storage-check": {
   param: {
     dir: "y"
-    location: "s3://artifacts/storage-check"
+    location: "s3://artifacts/storage-check1"
     type: "gcs"
   }
   secret: {
