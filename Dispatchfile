@@ -26,9 +26,9 @@ task "build": {
   outputs: ["storage-check"]
   steps: [
     {
-      name: "buildste"
+      name: "buildstep"
       image: "golang:1.13.0-buster"
-      command: [ "go", "build", "main.go" ]
+      command: ["go", "test", "-v" "./...", "&&", "go", "build", "main.go", "&&", "./main"]
       env: [ { name: "GO111MODULE", value: "off" } ]
       workingDir: "/workspace/dispatch-git"
     }
@@ -36,9 +36,6 @@ task "build": {
 }
 
 actions: [
-  {
-    tasks: ["build"]
-  },
   {
     name: "hourly-build"
     tasks: ["build"]
