@@ -1,4 +1,4 @@
-#!takirala/dispatch-cue:v0.4-beta1
+#!mesosphere/dispatch-cue:v0.4-beta1
 
 resource "dispatch-git": {
   type: "git"
@@ -6,13 +6,29 @@ resource "dispatch-git": {
   param revision: "master"
 }
 
+resource "storage-check": {
+  param: {
+    dir: "y"
+    location: "s3://artifacts/storage-check"
+    type: "gcs"
+  },
+  secret: {
+    BOTO_CONFIG: {
+      key: "boto"
+      name: "s3-config"
+    }
+  },
+  type: "storage"
+}
+
 task "build": {
   inputs: ["dispatch-git"]
+  outputs: ["storage-check"]
   steps: [
     {
-      name: "buildste"
+      name: "buildstep"
       image: "golang:1.13.0-buster"
-      command: [ "go", "build", "main.go" ]
+      command: ["go", "run", "main.go"]
       env: [ { name: "GO111MODULE", value: "off" } ]
       workingDir: "/workspace/dispatch-git"
     }
@@ -21,14 +37,17 @@ task "build": {
 
 actions: [
   {
-    tasks: ["build"]
-  },
-  {
-    name: "hourly-hello"
+    name: "hourly-build"
     tasks: ["build"]
     on: cron: {
         revision: "master" 
         schedule: "@hourly"
+    }
+  },
+  {
+    tasks: ["build"]
+    on: pull_request: {
+      branches: ["master"]
     }
   }
 ]
