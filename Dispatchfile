@@ -13,6 +13,6 @@ task("unit-test-simple",
         workingDir="$(resources.inputs.git.path)",
         command=["go", "test", "./..."])])
 
-tests = ["unit-tests-simple"]
+tests = ["unit-test-simple"]
 action(tasks=tests, on=pull_request())
 action(tasks=tests, on=pull_request(chatops=["build"]))
