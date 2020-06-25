@@ -1,6 +1,6 @@
 #!mesosphere/dispatch-starlark:v0.6
 
-load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.6", "git_resource", "pull_request")
+load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.6", "git_resource", "pull_request", "cron")
 load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.4", "kaniko")
 
 git = git_resource("git")
@@ -17,3 +17,4 @@ task("unit-test-simple",
 tests = ["unit-test-simple"]
 action(tasks=tests, on=pull_request())
 action(tasks=tests, on=pull_request(chatops=["build"]))
+action(name="nightly", on=cron(schedule="@dauly"))
