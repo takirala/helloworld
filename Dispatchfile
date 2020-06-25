@@ -1,34 +1,18 @@
-#!mesosphere/dispatch-cue:v0.4-beta1
+#!mesosphere/dispatch-starlark:v0.6-beta1
 
-resource "dispatch-git": {
-  type: "git"
-  param url: "$(context.git.url)"
-  param revision: "master"
-}
+load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.6", "git_resource", "pull_request")
+load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.4", "kaniko")
 
-task "build": {
-  inputs: ["dispatch-git"]
-  steps: [
-    {
-      name: "buildste"
-      image: "golang:1.13.0-buster"
-      command: [ "go", "build", "main.go" ]
-      env: [ { name: "GO111MODULE", value: "off" } ]
-      workingDir: "/workspace/dispatch-git"
-    }
-  ]
-}
+git = git_resource("helloworld-git")
 
-actions: [
-  {
-    tasks: ["build"]
-  },
-  {
-    name: "daily-hello"
-    tasks: ["build"]
-    on: cron: {
-        revision: "master" 
-        schedule: "@daily"
-    }
-  }
-]
+# Use the pushed docker image to run CI
+task("unit-test-simple",
+    steps=[k8s.corev1.Container(
+        name="unit-test-docker",
+        image="golang:1.13.0_buster",
+        workingDir="$(resources.inputs.git.path)",
+        command=["go", "test", "./..."])])
+
+tests = ["unit-tests-simple"]
+action(tasks=tests, on=pull_request())
+action(tasks=tests, on=pull_request(chatops=["build"]))
