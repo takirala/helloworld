@@ -1,4 +1,4 @@
-#!takirala/dispatch-cue:v0.4-beta1
+#!mesosphere/dispatch-cue:v0.4
 
 resource "dispatch-git": {
   type: "git"
@@ -24,11 +24,11 @@ actions: [
     tasks: ["build"]
   },
   {
-    name: "hourly-hello"
+    name: "daily-hello"
     tasks: ["build"]
     on: cron: {
         revision: "master" 
-        schedule: "@hourly"
+        schedule: "@daily"
     }
   }
 ]
