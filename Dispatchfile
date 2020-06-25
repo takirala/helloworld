@@ -7,6 +7,7 @@ git = git_resource("helloworld-git")
 
 # Use the pushed docker image to run CI
 task("unit-test-simple",
+    inputs=[git],
     steps=[k8s.corev1.Container(
         name="unit-test-docker",
         image="golang:1.13.0_buster",
