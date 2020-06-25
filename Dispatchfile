@@ -10,7 +10,7 @@ task("unit-test-simple",
     inputs=[git],
     steps=[k8s.corev1.Container(
         name="unit-test-docker",
-        image="golang:1.13.0_buster",
+        image="golang:1.13.0-buster",
         workingDir="$(resources.inputs.git.path)",
         command=["go", "test", "./..."])])
 
