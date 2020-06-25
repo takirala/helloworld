@@ -1,4 +1,4 @@
-#!mesosphere/dispatch-cue:v0.4
+#!mesosphere/dispatch-cue:v0.4-beta1
 
 resource "dispatch-git": {
   type: "git"
