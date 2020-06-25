@@ -12,7 +12,7 @@ task("unit-test-simple",
         name="unit-test-docker",
         image="golang:1.13.0-buster",
         workingDir="$(resources.inputs.git.path)",
-        command=["go", "test", "./..."])])
+        command=["go", "test", "./.."])])
 
 tests = ["unit-test-simple"]
 action(tasks=tests, on=pull_request())
