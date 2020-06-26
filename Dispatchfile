@@ -8,7 +8,8 @@ my_storage = storage_resource("my_storage")
 
 # Use the pushed docker image to run CI
 task("unit-test-simple",
-    inputs=[git, my_storage],
+    inputs=[git],
+    outputs=[my_storage],
     steps=[k8s.corev1.Container(
         name="unit-test-docker",
         image="golang:1.13.0-buster",
