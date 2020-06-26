@@ -28,7 +28,7 @@ actions: [
     tasks: ["build"]
     on: cron: {
         revision: "master" 
-        schedule: "@dauly"
+        schedule: "@daily"
     }
   }
 ]
