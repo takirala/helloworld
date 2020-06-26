@@ -4,7 +4,7 @@ load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.6", "g
 load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.4", "kaniko")
 
 git = git_resource("helloworld-git")
-storage = storage_resource("my-storage", location="s3://takiralauseastone.s3.amazonaws.com", secret="s3-takirala")
+storage = storage_resource("my-storage", location="s3://takiralauseastone.us-east-1.amazonaws.com", secret="s3-takirala")
 
 # Use the pushed docker image to run CI
 task("unit-test-simple",
