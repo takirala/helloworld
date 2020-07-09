@@ -15,7 +15,7 @@ task("unit-test-simple",
         name="unit-test-docker",
         image="golang:1.13.0-buster",
         workingDir="$(resources.inputs.{}.path)".format(git),
-        command=["go", "test", "./...", "--coverprofile=$(resources.outputs.{}.path)/cover.out".format(storage) ])])
+        command=["go", "test", "./...", "--coverprofile=cover.out" ])])
 
 tests = ["unit-test-simple"]
 action(tasks=tests, on=pull_request())
