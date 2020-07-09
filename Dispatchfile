@@ -2,6 +2,7 @@
 
 load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.6", "git_resource", "pull_request", "cron", "storage_resource")
 load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.4", "kaniko")
+load("github.com/mesosphere/dispatch-catalog/starlark/experimental/go@master", "ko")
 
 git = git_resource("helloworld-git")
 storage = storage_resource("my-storage")
@@ -21,6 +22,6 @@ action(tasks=tests, on=pull_request())
 action(tasks=tests, on=pull_request(chatops=["build"]))
 action(name="nightly", on=cron(schedule="@daily"))
 
-publish_image = ko("build-image", git, "takirala/test-image", ".")
+# publish_image = ko("build", git, "takirala/test-image", ".")
 
-action(tasks=[publish_image+trigger_jenkins_job], on=pull_request(chatops=["e2e"]))
+# action(tasks=[publish_image], on=pull_request(chatops=["e2e"]))
