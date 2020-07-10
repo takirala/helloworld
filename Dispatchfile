@@ -35,4 +35,13 @@ task("failed-task", outputs = ["failed"], deps = ["check"], steps = [k8s.corev1.
     image = "alpine",
     command = ["false"]
 )])
+
+def pull_request(**kwargs):
+    """
+    A sugar function for creating a new pull request condition.
+    Example usage: `action(tasks=["test"], on=pull_request(chatops=["build"]))`
+    """
+
+    return p.Condition(pull_request=p.PullRequestCondition(**kwargs))
+
 action(tasks = [ "succeeded-task", "check", "failed-task" ], on=pull_request(chatops=["build"]))
