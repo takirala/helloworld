@@ -1,6 +1,6 @@
 #!starlark
 # vi:syntax=python
-location = "s3://artifacts/s3-artifacts"
+location = "s3://integration-test-default/s3-artifacts"
 
 resource("succeeded", type = "storage", params = {
     "type": "gcs",
