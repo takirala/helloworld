@@ -22,10 +22,16 @@ task("version", steps = [
     v1.Container(name="version", image="alpine", command=["/bin/ash", "-c", "echo lol"])
 ])
 
-task("test", inputs = [ "version" ], steps = [
+task("test", steps = [
     v1.Container(name="test", image="alpine", command=[
         "/bin/ash", "-c", """
         ls -l /tekton/*
+        echo "a : $(inputs.tasks.version.version)"
+        echo "b : $(tasks.version.results.version)"
+        echo "c : $(inputs.params.dispatch--version--version)"
+        echo "d : $(inputs.tasks.version.version)"
+        echo "e : $(inputs)"
+        env
 set -ex
 
 [ "lol" = "$(inputs.tasks.version.version)" ]
