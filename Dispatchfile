@@ -1,27 +1,38 @@
-#!mesosphere/dispatch-starlark:v0.6
-
-load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.6", "git_resource", "pull_request", "cron", "storage_resource")
-load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.4", "kaniko")
-load("github.com/mesosphere/dispatch-catalog/starlark/experimental/go@master", "ko")
-
-git = git_resource("helloworld-git")
-storage = storage_resource("my-storage")
-
-# Use the pushed docker image to run CI
-task("unit-test-simple",
-    inputs=[git],
-    outputs=[storage],
-    steps=[k8s.corev1.Container(
-        name="unit-test-docker",
-        image="golang:1.13.0-buster",
-        workingDir="$(resources.inputs.{}.path)".format(git),
-        command=["go", "test", "./...", "--coverprofile=cover.out" ])])
-
-tests = ["unit-test-simple"]
-action(tasks=tests, on=pull_request())
-action(tasks=tests, on=pull_request(chatops=["build"]))
-action(name="nightly", on=cron(schedule="@daily"))
-
-# publish_image = ko("build", git, "takirala/test-image", ".")
-
-# action(tasks=[publish_image], on=pull_request(chatops=["e2e"]))
+#!starlark
+# vi:syntax=python
+location = "s3://integration-test-default/s3-artifacts"
+resource("succeeded", type = "storage", params = {
+    "type": "gcs",
+    "location": location + "/succeeded",
+    "dir": "yes"
+}, secrets = {
+    "BOTO_CONFIG": k8s.corev1.SecretKeySelector(key = "boto", localObjectReference = k8s.corev1.LocalObjectReference(name = "s3-config"))
+})
+task("succeeded-task", outputs = ["succeeded"], steps = [k8s.corev1.Container(
+    name = "write-artifacts",
+    image = "alpine",
+    command = ["touch", "$(resources.outputs.succeeded.path)/file"]
+)])
+task("check", inputs = ["succeeded"], steps = [k8s.corev1.Container(
+    name = "read-artifacts",
+    image = "alpine",
+    command = ["cat", "$(resources.inputs.succeeded.path)/file"]
+)])
+resource("failed", type = "storage", params = {
+    "type": "gcs",
+    "location": location + "/failed",
+    "dir": "yes"
+}, secrets = {
+    "BOTO_CONFIG": k8s.corev1.SecretKeySelector(key = "boto", localObjectReference = k8s.corev1.LocalObjectReference(name = "s3-config"))
+})
+# We make "failed-task" depend on "check" to ensure that "check" is scheduled.
+task("failed-task", outputs = ["failed"], deps = ["check"], steps = [k8s.corev1.Container(
+    name = "write-artifacts",
+    image = "alpine",
+    command = ["touch", "$(resources.outputs.failed.path)/file"]
+), k8s.corev1.Container(
+    name = "fail",
+    image = "alpine",
+    command = ["false"]
+)])
+action(tasks = [ "succeeded-task", "check", "failed-task" ], on=pull_request(chatops=["build"]))
