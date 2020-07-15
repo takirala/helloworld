@@ -1,5 +1,5 @@
 #!takirala/dispatch-starlark:v0.7-beta1
-# vi:syntax=python
+
 location = "s3://artifacts/s3-artifacts"
 
 resource("succeeded", type = "storage", params = {
