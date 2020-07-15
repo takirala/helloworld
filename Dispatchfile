@@ -1,6 +1,6 @@
-#!starlark
+#!takirala/dispatch-starlark:v0.7-beta1
 # vi:syntax=python
-location = "s3://integration-test-default/s3-artifacts"
+location = "s3://artifacts/s3-artifacts"
 
 resource("succeeded", type = "storage", params = {
     "type": "gcs",
@@ -49,4 +49,4 @@ def pull_request(**kwargs):
 
     return p.Condition(pull_request=p.PullRequestCondition(**kwargs))
 
-action(tasks = [ "succeeded-task", "check", "failed-task" ], on=pull_request(chatops=["build"]))
+action(tasks = [ "succeeded-task", "check", "failed-task" ], on=pull_request(chatops=["build"], labels=["ok-to-test", "!documentation"]))
