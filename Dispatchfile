@@ -1,6 +1,6 @@
-#!takirala/dispatch-starlark:v0.7-beta1
+#!takirala/dispatch-starlark:v0.6-beta1
 
-location = "s3://artifacts/s3-artifacts"
+location = "s3://artifacts/s3-artifacts-test"
 
 resource("succeeded", type = "storage", params = {
     "type": "gcs",
