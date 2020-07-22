@@ -1,4 +1,4 @@
-#!takirala/dispatch-starlark:v0.6-beta1
+#!mesosphere/dispatch-starlark:v0.7
 
 location = "s3://artifacts/s3-artifacts-test"
 
