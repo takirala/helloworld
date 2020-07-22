@@ -1,6 +1,6 @@
 #!mesosphere/dispatch-starlark:v0.7
 
-location = "s3://artifacts/s3-artifacts-test"
+location = "s3://artifacts/s3-artifacts-tes"
 
 resource("succeeded", type = "storage", params = {
     "type": "gcs",
