@@ -49,4 +49,4 @@ def pull_request(**kwargs):
 
     return p.Condition(pull_request=p.PullRequestCondition(**kwargs))
 
-action(tasks = [ "succeeded-task", "check", "failed-task" ], on=pull_request(chatops=["build"], labels=["ok-to-test", "!documentation"]))
+action(tasks = [ "succeeded-task", "check", "failed-task" ], on=pull_request(chatops=["build"]))
