@@ -1,34 +1,52 @@
-#!mesosphere/dispatch-cue:v0.4-beta1
+#!mesosphere/dispatch-starlark:v0.7
 
-resource "dispatch-git": {
-  type: "git"
-  param url: "$(context.git.url)"
-  param revision: "master"
-}
+location = "s3://artifacts/s3-artifacts-testing"
 
-task "build": {
-  inputs: ["dispatch-git"]
-  steps: [
-    {
-      name: "buildste"
-      image: "golang:1.13.0-buster"
-      command: [ "go", "build", "main.go" ]
-      env: [ { name: "GO111MODULE", value: "off" } ]
-      workingDir: "/workspace/dispatch-git"
-    }
-  ]
-}
+resource("succeeded", type = "storage", params = {
+    "type": "gcs",
+    "location": location + "/succeeded",
+    "dir": "yes"
+}, secrets = {
+    "BOTO_CONFIG": k8s.corev1.SecretKeySelector(key = "boto", localObjectReference = k8s.corev1.LocalObjectReference(name = "s3-config"))
+})
 
-actions: [
-  {
-    tasks: ["build"]
-  },
-  {
-    name: "daily-hello"
-    tasks: ["build"]
-    on: cron: {
-        revision: "master" 
-        schedule: "@daily"
-    }
-  }
-]
+task("succeeded-task", outputs = ["succeeded"], steps = [k8s.corev1.Container(
+    name = "write-artifacts",
+    image = "alpine",
+    command = ["touch", "$(resources.outputs.succeeded.path)/file"]
+)])
+
+task("check", inputs = ["succeeded"], steps = [k8s.corev1.Container(
+    name = "read-artifacts",
+    image = "alpine",
+    command = ["cat", "$(resources.inputs.succeeded.path)/file"]
+)])
+
+resource("failed", type = "storage", params = {
+    "type": "gcs",
+    "location": location + "/failed",
+    "dir": "yes"
+}, secrets = {
+    "BOTO_CONFIG": k8s.corev1.SecretKeySelector(key = "boto", localObjectReference = k8s.corev1.LocalObjectReference(name = "s3-config"))
+})
+
+# We make "failed-task" depend on "check" to ensure that "check" is scheduled.
+task("failed-task", outputs = ["failed"], deps = ["check"], steps = [k8s.corev1.Container(
+    name = "write-artifacts",
+    image = "alpine",
+    command = ["touch", "$(resources.outputs.failed.path)/file"]
+), k8s.corev1.Container(
+    name = "fail",
+    image = "alpine",
+    command = ["false"]
+)])
+
+def pull_request(**kwargs):
+    """
+    A sugar function for creating a new pull request condition.
+    Example usage: `action(tasks=["test"], on=pull_request(chatops=["build"]))`
+    """
+
+    return p.Condition(pull_request=p.PullRequestCondition(**kwargs))
+
+action(tasks = [ "succeeded-task", "check", "failed-task" ], on=pull_request(chatops=["build"]))

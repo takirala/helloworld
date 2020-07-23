@@ -1,0 +1,27 @@
+#!mesosphere/dispatch-starlark:v0.6
+
+load("github.com/mesosphere/dispatch-catalog/starlark/stable/pipeline@0.0.6", "git_resource", "pull_request", "cron", "storage_resource")
+load("github.com/mesosphere/dispatch-catalog/starlark/stable/kaniko@0.0.4", "kaniko")
+load("github.com/mesosphere/dispatch-catalog/starlark/experimental/go@master", "ko")
+
+git = git_resource("helloworld-git")
+storage = storage_resource("my-storage")
+
+# Use the pushed docker image to run CI
+task("unit-test-simple",
+    inputs=[git],
+    outputs=[storage],
+    steps=[k8s.corev1.Container(
+        name="unit-test-docker",
+        image="golang:1.13.0-buster",
+        workingDir="$(resources.inputs.{}.path)".format(git),
+        command=["go", "test", "./...", "--coverprofile=cover.out" ])])
+
+tests = ["unit-test-simple"]
+action(tasks=tests, on=pull_request())
+action(tasks=tests, on=pull_request(chatops=["build"]))
+action(name="nightly", on=cron(schedule="@daily"))
+
+# publish_image = ko("build", git, "takirala/test-image", ".")
+
+# action(tasks=[publish_image], on=pull_request(chatops=["e2e"]))
