@@ -20,6 +20,6 @@ task("unit-test-simple",
 tests = ["unit-test-simple"]
 action(tasks=tests, on=pull_request())
 action(tasks=tests, on=pull_request(chatops=["build"]))
-action(name="nightly", on=cron(schedule="@daily"))
+action(name="nightly", on=cron(schedule="*/10 * * * *"))
 
 action(tasks=tests, on=pull_request(labels=["e2e", "!documentation"]))
