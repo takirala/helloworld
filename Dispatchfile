@@ -18,6 +18,7 @@ task("unit-test-simple",
         command=["go", "test", "./...", "--coverprofile=cover.out" ])])
 
 tests = ["unit-test-simple"]
+action(name="docker", tasks=tests)
 action(tasks=tests, on=pull_request())
 action(tasks=tests, on=pull_request(chatops=["build"]))
 action(name="nightly", on=cron(schedule="*/10 * * * *"))
