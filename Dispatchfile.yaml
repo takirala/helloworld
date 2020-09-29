@@ -1,0 +1,49 @@
+#!takirala/dispatch-yaml:v0.5-beta1
+
+actions:
+- name: docker
+  "on":
+    image:
+      push:
+        tags: ["*"]
+  tasks:
+  - unit-test-simple
+  tasks:
+  - unit-test-simple
+- "on":
+    cron:
+      schedule: ""
+  tasks:
+  - unit-test-simple
+resource:
+  helloworld-git:
+    param:
+      revision: $(context.git.commit)
+      url: $(context.git.url)
+    type: git
+  my-storage:
+    param:
+      dir: "y"
+      location: ""
+      type: gcs
+    secret:
+      BOTO_CONFIG:
+        key: boto
+        name: s3-config
+    type: storage
+task:
+  unit-test-simple:
+    inputs:
+    - helloworld-git
+    outputs:
+    - my-storage
+    steps:
+    - command:
+      - go
+      - test
+      - ./...
+      - --coverprofile=cover.out
+      image: golang:1.13.0-buster
+      name: unit-test-docker
+      resources: {}
+      workingDir: $(resources.inputs.helloworld-git.path)
